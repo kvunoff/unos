@@ -50,7 +50,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    println_color!(Color::Cyan, "Welcome to Unos!");
+    println_color!(Color::Cyan, "Welcome to UnOS!");
 
     #[cfg(test)]
     test_main();
