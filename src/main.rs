@@ -4,6 +4,7 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 mod vga_buffer;
+mod serial;
 use crate::vga_buffer::Color;
 
 use core::panic::PanicInfo;
