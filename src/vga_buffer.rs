@@ -45,6 +45,10 @@ pub struct Writer {
 }
 
 impl Writer {
+    pub fn set_color(&mut self, foreground: Color, background: Color) {
+        self.color_code = ColorCode::new(foreground, background);
+    }
+
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -120,11 +124,26 @@ macro_rules! print {
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
-    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::vga_buffer::_print_color($crate::vga_buffer::Color::White, format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println_color {
+    ($color:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_color($color, format_args!($($arg)*)));
 }
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
+}
+
+#[doc(hidden)]
+pub fn _print_color(color: Color, args: fmt::Arguments) {
+    use core::fmt::Write;
+    let mut writer = WRITER.lock();
+    let old_color = writer.color_code;
+    writer.set_color(color, Color::Black);
+    writer.write_fmt(args).unwrap();
+    writer.color_code = old_color;
 }
