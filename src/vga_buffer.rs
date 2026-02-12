@@ -111,7 +111,7 @@ impl fmt::Write for Writer {
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        color_code: ColorCode::new(Color::White, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
     });
 }
@@ -124,12 +124,12 @@ macro_rules! print {
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
-    ($($arg:tt)*) => ($crate::vga_buffer::_print_color($crate::vga_buffer::Color::White, format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::vga_buffer::_println_color($crate::vga_buffer::Color::White, format_args!($($arg)*)));
 }
 
 #[macro_export]
 macro_rules! println_color {
-    ($color:expr, $($arg:tt)*) => ($crate::vga_buffer::_print_color($color, format_args!($($arg)*)));
+    ($color:expr, $($arg:tt)*) => ($crate::vga_buffer::_println_color($color, format_args!($($arg)*)));
 }
 
 #[doc(hidden)]
@@ -145,5 +145,16 @@ pub fn _print_color(color: Color, args: fmt::Arguments) {
     let old_color = writer.color_code;
     writer.set_color(color, Color::Black);
     writer.write_fmt(args).unwrap();
+    writer.color_code = old_color;
+}
+
+#[doc(hidden)]
+pub fn _println_color(color: Color, args: fmt::Arguments) {
+    use core::fmt::Write;
+    let mut writer = WRITER.lock();
+    let old_color = writer.color_code;
+    writer.set_color(color, Color::Black);
+    writer.write_fmt(args).unwrap();
+    writer.write_str("\n").unwrap();
     writer.color_code = old_color;
 }
