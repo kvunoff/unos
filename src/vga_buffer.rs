@@ -160,19 +160,13 @@ pub fn _println_color(color: Color, args: fmt::Arguments) {
 }
 
 #[test_case]
-fn test_println_simple() {
+fn test_vga_buffer_comprehensive() {
     println!("test_println_simple output");
-}
-
-#[test_case]
-fn test_println_many() {
+    
     for _ in 0..200 {
         println!("test_println_many output");
     }
-}
 
-#[test_case]
-fn test_println_output() {
     let s = "Some test string that fits on a single line";
     println!("{}", s);
     for (i, c) in s.chars().enumerate() {
