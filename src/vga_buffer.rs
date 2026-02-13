@@ -135,9 +135,12 @@ macro_rules! println_color {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
-}
+    use x86_64::instructions::interrupts;
 
+    interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
+}
 #[doc(hidden)]
 pub fn _print_color(color: Color, args: fmt::Arguments) {
     use core::fmt::Write;
@@ -160,13 +163,19 @@ pub fn _println_color(color: Color, args: fmt::Arguments) {
 }
 
 #[test_case]
-fn test_vga_buffer_comprehensive() {
+fn test_println_simple() {
     println!("test_println_simple output");
-    
+}
+
+#[test_case]
+fn test_println_many() {
     for _ in 0..200 {
         println!("test_println_many output");
     }
+}
 
+#[test_case]
+fn test_println_output() {
     let s = "Some test string that fits on a single line";
     println!("{}", s);
     for (i, c) in s.chars().enumerate() {
