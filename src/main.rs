@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use unos::{println, println_color, vga_buffer::Color};
+use unos::{println, println_color, print, vga_buffer::Color};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
@@ -17,14 +17,14 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     println_color!(Color::LightGreen, "\nAll done!");
-    loop {}
+    unos::hlt_loop()
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    unos::hlt_loop()
 }
 
 #[cfg(test)]
