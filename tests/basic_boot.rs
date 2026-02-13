@@ -5,6 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use unos::println;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
@@ -15,6 +16,11 @@ pub extern "C" fn _start() -> ! {
 
 fn test_runner(tests: &[&dyn Fn()]) {
     unimplemented!();
+}
+
+#[test_case]
+fn test_println() {
+    println!("test_vga_buffer_comprehensive output");
 }
 
 #[panic_handler]
