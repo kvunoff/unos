@@ -13,6 +13,7 @@ use core::panic::PanicInfo;
 #[cfg(test)]
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
     loop {}
 }
