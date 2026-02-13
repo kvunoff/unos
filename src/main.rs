@@ -11,9 +11,14 @@ use unos::{println, println_color, vga_buffer::Color};
 pub extern "C" fn _start() -> ! {
     println_color!(Color::Cyan, "Welcome to UnOS!");
 
+    unos::init();
+
+    x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
 
+    println_color!(Color::LightGreen, "It did not crash!");
     loop {}
 }
 
