@@ -8,6 +8,13 @@ pub mod vga_buffer;
 
 use core::panic::PanicInfo;
 
+#[cfg(test)]
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    test_main();
+    loop {}
+}
+
 pub trait Testable {
     fn run(&self) -> ();
 }
@@ -35,13 +42,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
-}
-
-#[cfg(test)]
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    test_main();
     loop {}
 }
 
