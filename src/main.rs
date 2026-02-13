@@ -15,7 +15,8 @@ pub extern "C" fn _start() -> ! {
 
     #[cfg(test)]
     test_main();
-    
+
+    println_color!(Color::LightGreen, "\nAll done!");
     loop {}
 }
 
