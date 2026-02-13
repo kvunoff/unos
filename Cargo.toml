@@ -3,6 +3,10 @@ name = "unos"
 test = true
 bench = false
 
+[[test]]
+name = "should_panic"
+harness = false
+
 [package]
 name = "unos"
 version = "0.1.0"
