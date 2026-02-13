@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use unos::{println, println_color, print, vga_buffer::Color};
+use unos::{println, println_color, vga_buffer::Color};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
