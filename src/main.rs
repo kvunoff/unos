@@ -13,12 +13,9 @@ pub extern "C" fn _start() -> ! {
 
     unos::init();
 
-    x86_64::instructions::interrupts::int3();
-
     #[cfg(test)]
     test_main();
-
-    println_color!(Color::LightGreen, "It did not crash!");
+    
     loop {}
 }
 
