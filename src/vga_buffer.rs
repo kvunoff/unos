@@ -1,4 +1,5 @@
 use volatile::Volatile;
+use x86_64::instructions::interrupts;
 use core::fmt;
 use spin::Mutex;
 use lazy_static::lazy_static;
@@ -144,22 +145,28 @@ pub fn _print(args: fmt::Arguments) {
 #[doc(hidden)]
 pub fn _print_color(color: Color, args: fmt::Arguments) {
     use core::fmt::Write;
-    let mut writer = WRITER.lock();
-    let old_color = writer.color_code;
-    writer.set_color(color, Color::Black);
-    writer.write_fmt(args).unwrap();
-    writer.color_code = old_color;
+
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        let old_color = writer.color_code;
+        writer.set_color(color, Color::Black);
+        writer.write_fmt(args).unwrap();
+        writer.color_code = old_color;
+    });
 }
 
-#[doc(hidden)]
 pub fn _println_color(color: Color, args: fmt::Arguments) {
     use core::fmt::Write;
-    let mut writer = WRITER.lock();
-    let old_color = writer.color_code;
-    writer.set_color(color, Color::Black);
-    writer.write_fmt(args).unwrap();
-    writer.write_str("\n").unwrap();
-    writer.color_code = old_color;
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        let old_color = writer.color_code;
+        writer.set_color(color, Color::Black);
+        writer.write_fmt(args).unwrap();
+        writer.write_str("\n").unwrap();
+        writer.color_code = old_color;
+    });
 }
 
 #[test_case]
@@ -176,10 +183,16 @@ fn test_println_many() {
 
 #[test_case]
 fn test_println_output() {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
+
     let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_character), c);
-    }
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        for (i, c) in s.chars().enumerate() {
+            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_character), c);
+        }
+    });
 }
