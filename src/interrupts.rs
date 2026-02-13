@@ -44,7 +44,7 @@ extern "x86-interrupt" fn double_fault_handler(
 extern "x86-interrupt" fn timer_interrupt_handler(
     _stack_frame: InterruptStackFrame)
 {
-    print!(".");
+    // print!(".");
 
     unsafe {
         PICS.lock()
@@ -54,9 +54,10 @@ extern "x86-interrupt" fn timer_interrupt_handler(
 extern "x86-interrupt" fn keyboard_interrupt_handler(
     _stack_frame: InterruptStackFrame)
 {
-    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1, KeyCode};
     use spin::Mutex;
     use x86_64::instructions::port::Port;
+    use crate::vga_buffer::WRITER;
 
     lazy_static! {
         static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
@@ -72,8 +73,22 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
         if let Some(key) = keyboard.process_keyevent(key_event) {
             match key {
-                DecodedKey::Unicode(character) => print!("{}", character),
-                DecodedKey::RawKey(key) => print!("{:?}", key),
+                DecodedKey::Unicode(character) => {
+                    match character {
+                        '\x08' => WRITER.lock().backspace(),
+                        '\x1b' => WRITER.lock().clear_screen(),
+                        '\n'   => print!("\n"),
+                        c if c.is_ascii_graphic() || c == ' ' => print!("{}", c),
+                        _ => {}, 
+                    }
+                },
+                DecodedKey::RawKey(key) => {
+                    match key {
+                        KeyCode::Escape => WRITER.lock().clear_screen(),
+                        KeyCode::Delete => WRITER.lock().backspace(),
+                        _ => {},
+                    }
+                },
             }
         }
     }
