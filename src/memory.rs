@@ -40,6 +40,12 @@ pub struct BootInfoFrameAllocator {
 }
 
 impl BootInfoFrameAllocator {
+    pub unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
         let regions = self.memory_map.iter();
         let usable_regions = regions
