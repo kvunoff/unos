@@ -2,6 +2,7 @@ use x86_64::{
     structures::paging::{Page, PhysFrame, Mapper, Size4KiB, FrameAllocator, OffsetPageTable, PageTable},
     VirtAddr, PhysAddr
 };
+use bootloader::bootinfo::MemoryMap;
 
 pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static> {
     unsafe {
