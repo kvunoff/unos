@@ -9,9 +9,10 @@ use x86_64::{
     },
     VirtAddr,
 };
+use linked_list_allocator::LockedHeap;
 
 #[global_allocator]
-static ALLOCATOR: Dummy = Dummy;
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 pub struct Dummy;
 
@@ -45,6 +46,10 @@ pub fn init_heap(
         unsafe {
             mapper.map_to(page, frame, flags, frame_allocator)?.flush()
         };
+    }
+    
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
     }
 
     Ok(())
